@@ -14,7 +14,7 @@ from midas.midas_net_custom import MidasNet_small
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 
 
-def run(input_path="api-server/input", output_path="api-server/output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
+def run(imageName=None, input_path="api-server/input", output_path="api-server/output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -100,7 +100,11 @@ def run(input_path="api-server/input", output_path="api-server/output", model_pa
     model.to(device)
 
     # get input
-    img_names = glob.glob(os.path.join(input_path, "*"))
+    if imageName == None:
+        img_names = glob.glob(os.path.join(input_path, "*"))
+    else:
+        img_names = [os.path.join(input_path, imageName + '.jpg')]
+
     num_images = len(img_names)
 
     # create output folder
@@ -189,5 +193,5 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
     # compute depth maps
-    run(args.input_path, args.output_path,
+    run(None, args.input_path, args.output_path,
         args.model_weights, args.model_type, args.optimize)
