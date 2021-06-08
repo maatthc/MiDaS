@@ -39,10 +39,10 @@ def create_app(test_config=None):
     def depth():
         imageUrl = request.args.get('url')
         splitUrl = parse.urlsplit(imageUrl)
-        imageName = splitUrl.path.split('.')[0]
+        imageName = splitUrl.path.split('/')[-1].split('.')[0]
         img_data = requests.get(
             imageUrl, headers=app.config['HEADERS']).content
-        with open(app.config['IMAGE_INPUT'] + imageName + 'jpg', 'wb') as handler:
+        with open(app.config['IMAGE_INPUT'] + imageName + '.jpg', 'wb') as handler:
             handler.write(img_data)
         run()
         return send_from_directory(app.config['IMAGE_OUTPUT'], imageName + '.png', mimetype='image/png')
