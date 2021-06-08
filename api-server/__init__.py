@@ -45,6 +45,7 @@ def create_app(test_config=None):
         with open(app.config['IMAGE_INPUT'] + imageName + '.jpg', 'wb') as handler:
             handler.write(img_data)
         run()
+        os.remove(app.config['IMAGE_INPUT'] + imageName + '.jpg')
         return send_from_directory(app.config['IMAGE_OUTPUT'], imageName + '.png', mimetype='image/png')
 
     return app
