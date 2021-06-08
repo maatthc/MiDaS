@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath('../'))
 from run import run
 import requests
 from flask import send_from_directory
+from urllib import parse
 
 
 def root_dir():
@@ -37,11 +38,13 @@ def create_app(test_config=None):
     @app.route('/generate-depth', methods=(['GET']))
     def depth():
         imageUrl = request.args.get('url')
+        splitUrl = parse.urlsplit(imageUrl)
+        imageName = splitUrl.path.split('.')[0]
         img_data = requests.get(
             imageUrl, headers=app.config['HEADERS']).content
-        with open(app.config['IMAGE_INPUT'] + 'image.jpg', 'wb') as handler:
+        with open(app.config['IMAGE_INPUT'] + imageName + 'jpg', 'wb') as handler:
             handler.write(img_data)
         run()
-        return send_from_directory(app.config['IMAGE_OUTPUT'], 'image.png', mimetype='image/png')
+        return send_from_directory(app.config['IMAGE_OUTPUT'], imageName + '.png', mimetype='image/png')
 
     return app
