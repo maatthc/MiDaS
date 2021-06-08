@@ -3,7 +3,8 @@ import sys
 from flask import Flask
 from flask import request
 sys.path.append(os.path.abspath('../'))
-from run import run
+from run import init
+from run import process
 import requests
 from flask import send_from_directory
 from urllib import parse
@@ -15,6 +16,7 @@ def root_dir():
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
+    imageName, input_path, optimize, device, model, output_path, transform = init()
     app.config.from_mapping(
         IMAGE_INPUT=root_dir() + "/input/",
         IMAGE_OUTPUT=root_dir() + "/output/",
@@ -24,7 +26,11 @@ def create_app(test_config=None):
             'Cookie': 'cache_bypass=True',
             'Pragma': 'no-cache',
             'Cache-Control': 'no-cache',
-        }
+        },
+        OPTIMIZE=optimize,
+        DEVICE=device,
+        MODEL=model,
+        TRANSFORM=transform
     )
 
     # ensure the instance folder exists
@@ -44,7 +50,8 @@ def create_app(test_config=None):
             imageUrl, headers=app.config['HEADERS']).content
         with open(app.config['IMAGE_INPUT'] + imageName + '.jpg', 'wb') as handler:
             handler.write(img_data)
-        run(imageName)
+        process(imageName, app.config['IMAGE_INPUT'], app.config['OPTIMIZE'],
+                app.config['DEVICE'], app.config['MODEL'], app.config['IMAGE_OUTPUT'], app.config['TRANSFORM'])
         os.remove(app.config['IMAGE_INPUT'] + imageName + '.jpg')
         return send_from_directory(app.config['IMAGE_OUTPUT'], imageName + '.png', mimetype='image/png')
 

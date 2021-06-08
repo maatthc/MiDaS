@@ -14,7 +14,7 @@ from midas.midas_net_custom import MidasNet_small
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 
 
-def run(imageName=None, input_path="api-server/input", output_path="api-server/output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
+def init(imageName=None, input_path="api-server/input", output_path="api-server/output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:
@@ -99,28 +99,24 @@ def run(imageName=None, input_path="api-server/input", output_path="api-server/o
 
     model.to(device)
 
-    # get input
+    # create output folder
+    os.makedirs(output_path, exist_ok=True)
+
+    print("Ready for processing!")
+    return imageName, input_path, optimize, device, model, output_path, transform
+
+
+def process(imageName, input_path, optimize, device, model, output_path, transform):
+    print(f"Processing with imageName = {imageName}")
     if imageName == None:
         img_names = glob.glob(os.path.join(input_path, "*"))
     else:
         img_names = [os.path.join(input_path, imageName + '.jpg')]
-
     num_images = len(img_names)
-
-    # create output folder
-    os.makedirs(output_path, exist_ok=True)
-
-    print("start processing")
-
     for ind, img_name in enumerate(img_names):
-
         print("  processing {} ({}/{})".format(img_name, ind + 1, num_images))
-
-        # input
-
         img = utils.read_image(img_name)
         img_input = transform({"image": img})["image"]
-
         # compute
         with torch.no_grad():
             sample = torch.from_numpy(img_input).to(device).unsqueeze(0)
@@ -139,14 +135,13 @@ def run(imageName=None, input_path="api-server/input", output_path="api-server/o
                 .cpu()
                 .numpy()
             )
-
         # output
         filename = os.path.join(
             output_path, os.path.splitext(os.path.basename(img_name))[0]
         )
         utils.write_depth(filename, prediction, bits=2)
 
-    print("finished")
+        print("finished")
 
 
 if __name__ == "__main__":
@@ -193,5 +188,7 @@ if __name__ == "__main__":
     torch.backends.cudnn.benchmark = True
 
     # compute depth maps
-    run(None, args.input_path, args.output_path,
-        args.model_weights, args.model_type, args.optimize)
+    imageName, input_path, optimize, device, model, output_path, transform = init(None, args.input_path, args.output_path,
+                                                                                  args.model_weights, args.model_type, args.optimize)
+    process(imageName, input_path, optimize,
+            device, model, output_path, transform)
