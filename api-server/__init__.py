@@ -16,7 +16,14 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         IMAGE_INPUT=root_dir() + "/input/",
-        IMAGE_OUTPUT=root_dir() + "/output/"
+        IMAGE_OUTPUT=root_dir() + "/output/",
+        HEADERS={
+            'User-Agent':
+            'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+            'Cookie': 'cache_bypass=True',
+            'Pragma': 'no-cache',
+            'Cache-Control': 'no-cache',
+        }
     )
 
     # ensure the instance folder exists
@@ -30,7 +37,8 @@ def create_app(test_config=None):
     @app.route('/generate-depth', methods=(['GET']))
     def depth():
         imageUrl = request.args.get('url')
-        img_data = requests.get(imageUrl).content
+        img_data = requests.get(
+            imageUrl, headers=app.config['HEADERS']).content
         with open(app.config['IMAGE_INPUT'] + 'image.jpg', 'wb') as handler:
             handler.write(img_data)
         run()
