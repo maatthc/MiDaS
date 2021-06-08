@@ -14,7 +14,7 @@ from midas.midas_net_custom import MidasNet_small
 from midas.transforms import Resize, NormalizeImage, PrepareForNet
 
 
-def run(input_path="input", output_path="output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
+def run(input_path="api-server/input", output_path="api-server/output", model_path="weights/midas_v21_small-70d6b9c8.pt", model_type="midas_v21_small", optimize=True):
     """Run MonoDepthNN to compute depth maps.
 
     Args:

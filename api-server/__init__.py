@@ -5,14 +5,18 @@ from flask import request
 sys.path.append(os.path.abspath('../'))
 from run import run
 import requests
-from flask import send_file
+from flask import send_from_directory
+
+
+def root_dir():
+    return os.path.abspath(os.path.dirname(__file__))
 
 
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        IMAGE_INPUT="../input/",
-        IMAGE_OUTPUT="../output/"
+        IMAGE_INPUT=root_dir() + "/input/",
+        IMAGE_OUTPUT=root_dir() + "/output/"
     )
 
     # ensure the instance folder exists
@@ -30,6 +34,6 @@ def create_app(test_config=None):
         with open(app.config['IMAGE_INPUT'] + 'image.jpg', 'wb') as handler:
             handler.write(img_data)
         run()
-        return send_file(app.config['IMAGE_OUTPUT'] + 'image.png', mimetype='image/png')
+        return send_from_directory(app.config['IMAGE_OUTPUT'] + 'image.png', mimetype='image/png')
 
     return app
