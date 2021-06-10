@@ -47,13 +47,13 @@ def create_app(test_config=None):
         splitUrl = parse.urlsplit(imageUrl)
         imageName = splitUrl.path.split('/')[-1].split('.')[0]
         img_data = requests.get(
-            imageUrl, headers=app.config['HEADERS']).content
+            imageUrl, headers=app.config['HEADERS'])
         if img_data.status_code != 200:
             app.logger.error(
                 f'Unexpected return code ({img_data.status_code}) when downloading asset: {imageUrl}')
             abort(500)
         with open(app.config['IMAGE_INPUT'] + imageName + '.jpg', 'wb') as handler:
-            handler.write(img_data)
+            handler.write(img_data.content)
         process(imageName, app.config['IMAGE_INPUT'], app.config['OPTIMIZE'],
                 app.config['DEVICE'], app.config['MODEL'], app.config['IMAGE_OUTPUT'], app.config['TRANSFORM'])
         os.remove(app.config['IMAGE_INPUT'] + imageName + '.jpg')
