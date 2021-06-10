@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath('../'))
 from run import init
 from run import process
 import requests
-from flask import send_from_directory
+from flask import send_from_directory, abort
 from urllib import parse
 
 
@@ -48,6 +48,10 @@ def create_app(test_config=None):
         imageName = splitUrl.path.split('/')[-1].split('.')[0]
         img_data = requests.get(
             imageUrl, headers=app.config['HEADERS']).content
+        if img_data.status_code != 200:
+            app.logger.error(
+                f'Unexpected return code ({img_data.status_code}) when downloading asset: {imageUrl}')
+            abort(500)
         with open(app.config['IMAGE_INPUT'] + imageName + '.jpg', 'wb') as handler:
             handler.write(img_data)
         process(imageName, app.config['IMAGE_INPUT'], app.config['OPTIMIZE'],
