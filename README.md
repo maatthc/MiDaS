@@ -42,5 +42,5 @@ wget https://raw.githubusercontent.com/instinct79/gen-efficientnet-pytorch/fix-p
 ```
 export FLASK_ENV=development
 export FLASK_APP=api-server
-flask run
+flask run --host=0.0.0.0
 ```
